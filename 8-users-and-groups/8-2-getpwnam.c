@@ -2,6 +2,7 @@
 #include <pwd.h>
 #include <string.h>
 #include <stdio.h>
+#include <assert.h>
 
 struct passwd *getpwnam(const char *name) {
 	setpwent();
@@ -20,4 +21,6 @@ int main(int argc, char *argv[]) {
 	printf("user id is %d\n", pwd->pw_uid);
 	pwd = getpwnam("games");
 	printf("user id is %d\n", pwd->pw_uid);
+	pwd = getpwnam("non-existing-user");
+	assert(pwd == NULL);
 }
