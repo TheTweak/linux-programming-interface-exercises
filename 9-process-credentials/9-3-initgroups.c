@@ -4,6 +4,7 @@
 #include <limits.h>
 #include <string.h>
 #include <stdio.h>
+#include <unistd.h>
 
 #define SG_SIZE (NGROUPS_MAX + 1)
 
@@ -28,12 +29,19 @@ int initgroups_(const char *user, gid_t group) {
 		}
 	}
 	endgrent();
-
+	groups[numGroups++] = group;
 	for (int i = 0; i < numGroups; i++) {
 		printf("group id: %d\n", groups[i]);
 	}
+	setgroups(numGroups, groups);
 }
 
-int main(char *argv[], int argc) {
-	initgroups_("thetweak", 0);
+int main(int argc, char *argv[]) {
+	initgroups_("thetweak", 1337);
+	gid_t groups[SG_SIZE];
+	int groupsNum = getgroups(SG_SIZE, groups);
+	printf("getgroups result: \n");
+	for (int i = 0; i < groupsNum; i++) {
+		printf("group id: %d\n", groups[i]);
+	}
 }
