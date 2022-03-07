@@ -4,6 +4,8 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include <string.h>
+#include <unistd.h>
+#include <stdlib.h>
 
 int main(int argc, char *argv[])
 {
@@ -43,8 +45,30 @@ int main(int argc, char *argv[])
 		strcat(statusDirName, dirName);
 		strcat(statusDirName, "/status");
 		int fd;
+		ssize_t initialSize = 512;
+		ssize_t bufferSize = 128;
+		char buffer[bufferSize];  
 		if ((fd = open(statusDirName, O_RDONLY)) != -1) {
-			printf("status dir: %s \n", statusDirName);	
+			printf("\n\nstatus dir: %s \n", statusDirName);
+			char *lineBytes = malloc(initialSize);
+			char *ptr = lineBytes;
+			ssize_t size = initialSize;
+			ssize_t readBytes = 0;
+			ssize_t totalRead = 0;
+			while ((readBytes = read(fd, buffer, bufferSize)) != 0) {
+				totalRead += readBytes;
+				if (totalRead > size) {
+					char *newLineBytes = malloc(size*2);
+					memcpy(newLineBytes, lineBytes, size);
+					free(lineBytes);
+					lineBytes = newLineBytes;
+					ptr = lineBytes + size;
+					size = size*2;
+				}
+				memcpy(ptr, &buffer, readBytes);
+				ptr += readBytes;
+			}
+			write(1, lineBytes, totalRead);
 		}
 	}
 }
