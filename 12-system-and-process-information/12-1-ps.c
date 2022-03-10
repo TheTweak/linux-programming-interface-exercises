@@ -68,24 +68,20 @@ int main(int argc, char *argv[]) {
 		char *statusDirName = constructStatusDirPath(dirEnt);
 		int fd;
 		if ((fd = open(statusDirName, O_RDONLY)) != -1) {
-			printf("\n\nstatus dir: %s \n", statusDirName);
 			int initialSize = 512;
 			char *content = malloc(initialSize);
-			ssize_t totalRead = readFile(fd, &content, initialSize);
-			//write(1, content, totalRead);
+			readFile(fd, &content, initialSize);
 			close(fd);
-			write(1, content+0, 20);
-			/*
-			ssize_t l = 0;
-			ssize_t r = 0;
-			while (r < totalRead) {
-				while (r < totalRead && *(content+r) != '\n') {
-					r++;
+
+			char *uidStart;
+			if ((uidStart = strstr(content, "Uid:")) != NULL) {
+				char *uid = strtok(uidStart, "\t");
+				uid = strtok(NULL, "\t");
+				if (atoi(uid) == (int)pwd->pw_uid) {
+					write(1, content, strchr(content, '\n') - content);
+					write(1, "\n", 1);
 				}
-				write(1, content + l, r);
-				l = r;
-			}*/
-			break;
+			}
 		}
 	}
 }
